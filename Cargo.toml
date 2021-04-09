@@ -14,7 +14,7 @@ proc-macro = true
 
 [dependencies]
 syn = "1.0.13"
-log = "*"
+log = "0.4"
 quote = "1.0.2"
 tokio-postgres = "0.5.5"
 
