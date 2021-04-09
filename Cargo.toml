@@ -5,7 +5,7 @@ authors = ["Lex Childs <lexchilds@gmail.com>"]
 edition = "2018"
 license = "BSD-3-Clause"
 categories = [ "database", "asynchronous" ]
-keywords = [ "database", "async", "postgres", "object mapper" ]
+keywords = [ "database", "async", "postgres", "objectmapper" ]
 
 [lib]
 proc-macro = true
