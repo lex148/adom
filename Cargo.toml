@@ -4,8 +4,10 @@ version = "0.0.1"
 authors = ["Lex Childs <lexchilds@gmail.com>"]
 edition = "2018"
 license = "BSD-3-Clause"
+description = "async-postgres macros for object mapping"
 categories = [ "database", "asynchronous" ]
 keywords = [ "database", "async", "postgres", "objectmapper" ]
+repository = "https://github.com/lex148/adom"
 
 [lib]
 proc-macro = true
