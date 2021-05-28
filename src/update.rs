@@ -28,9 +28,8 @@ pub fn impl_update_macro(ast: &syn::DeriveInput) -> TokenStream {
 
     let params_array = quote! { #(#reads),* };
 
-    let gen = quote! {
+    let gen_update_no_audit = quote! {
         impl #name {
-
             pub async fn update<C>(&self, client: &C) -> std::result::Result<(), tokio_postgres::error::Error>
                 where C: GenericClient
             {
@@ -40,11 +39,39 @@ pub fn impl_update_macro(ast: &syn::DeriveInput) -> TokenStream {
                 client.query(&statement, &[#params_array]).await?;
                 Ok(())
             }
-
         }
     };
-    //println!("UPDATE: {}", gen);
-    gen.into()
+    if !utils::is_auditable(ast) {
+        return gen_update_no_audit.into();
+    }
+
+    let updated_by_field = my_fields
+        .iter()
+        .filter(|f| f.ident.is_some())
+        .find(|i| i.ident.as_ref().unwrap().to_string() == "updated_by")
+        .expect(&format!("Struct {} to contain a field updated_by", name));
+    let updated_by_type = &updated_by_field.ty;
+
+    let gen_update_with_audit = quote! {
+        impl #name {
+            pub async fn update<C>(&mut self, client: &C, by: &#updated_by_type) -> std::result::Result<(), tokio_postgres::error::Error>
+                where C: GenericClient
+            {
+                self.updated_by = by.clone();
+                self.updated_at = std::time::SystemTime::now();
+
+                let sql = #update_sql;
+                log::debug!("UPDATE: {}", sql);
+                let statement: tokio_postgres::Statement = client.prepare(&sql).await?;
+                client.query(&statement, &[#params_array]).await?;
+                Ok(())
+            }
+        }
+    };
+
+    gen_update_with_audit.into()
+
+    //gen.into()
 }
 
 fn update_text(table: &str, fields: &syn::Fields) -> String {

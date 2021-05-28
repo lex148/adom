@@ -18,6 +18,21 @@ pub fn get_tablename(ast: &syn::DeriveInput) -> String {
     tablename
 }
 
+pub fn is_auditable(ast: &syn::DeriveInput) -> bool {
+    for attr in ast.attrs.iter() {
+        let option = attr.parse_meta().unwrap();
+        match option {
+            syn::Meta::Path(p) => {
+                if p.is_ident("AdomAuditable") {
+                    return true;
+                }
+            }
+            _ => {}
+        };
+    }
+    false
+}
+
 pub fn get_columnname(field: &syn::Field) -> String {
     for attr in field.attrs.iter() {
         let meta = attr.parse_meta().unwrap();

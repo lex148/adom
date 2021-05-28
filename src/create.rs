@@ -22,7 +22,7 @@ pub fn impl_create_macro(ast: &syn::DeriveInput) -> TokenStream {
         .map(|f| quote! { &self.#f });
     let params_array = quote! { #(#reads),* };
 
-    let gen = quote! {
+    let gen_create_no_audit = quote! {
         impl #name {
             pub async fn create<C>(&mut self, client: &C) -> std::result::Result<(), tokio_postgres::error::Error>
                 where C: GenericClient
@@ -40,7 +40,48 @@ pub fn impl_create_macro(ast: &syn::DeriveInput) -> TokenStream {
             }
         }
     };
-    //println!("CODE: {}", gen);
+    if !utils::is_auditable(ast) {
+        return gen_create_no_audit.into();
+    }
+
+    let created_by_field = my_fields
+        .iter()
+        .filter(|f| f.ident.is_some())
+        .find(|i| i.ident.as_ref().unwrap().to_string() == "created_by")
+        .expect(&format!("Struct {} to contain a field created_by", name));
+    let created_by_type = &created_by_field.ty;
+
+    let gen_create_with_audit = quote! {
+        impl #name {
+            pub async fn create<C>(&mut self, client: &C, by: &#created_by_type) -> std::result::Result<(), tokio_postgres::error::Error>
+                where C: GenericClient
+            {
+                let now = std::time::SystemTime::now();
+                self.created_by = by.clone();
+                self.updated_by = by.clone();
+                self.updated_at = now.clone();
+                self.created_at = now;
+
+                let sql: &str = #insert_str;
+                let statement: tokio_postgres::Statement = client.prepare(sql).await?;
+                let id_row = client
+                    .query_one(
+                        &statement,
+                        &[#params_array],
+                    )
+                    .await?;
+                self.id = id_row.try_get(0)?;
+                Ok(())
+            }
+        }
+    };
+
+    let gen = if utils::is_auditable(ast) {
+        gen_create_with_audit
+    } else {
+        gen_create_no_audit
+    };
+
     gen.into()
 }
 
