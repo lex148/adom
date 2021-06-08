@@ -20,6 +20,7 @@ pub fn impl_update_macro(ast: &syn::DeriveInput) -> TokenStream {
     let reads_data = my_fields
         .iter()
         .filter(|&f| f.ident.as_ref().unwrap().to_string() != "id")
+        .filter(|f| !utils::is_ignore(f))
         .map(|f| f.ident.as_ref())
         .filter_map(|f| f)
         .map(|f| quote! { &self.#f });
@@ -78,7 +79,8 @@ fn update_text(table: &str, fields: &syn::Fields) -> String {
     let cols = fields
         .iter()
         .filter(|&f| f.ident.as_ref().unwrap().to_string() != "id")
-        .map(|f| utils::get_columnname(f));
+        .map(|f| utils::get_columnname(f))
+        .filter_map(|f| f);
     //build a list of $1, $2, $3 args for the sql params
     let args = cols
         .clone()

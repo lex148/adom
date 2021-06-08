@@ -11,19 +11,25 @@ mod update;
 mod utils;
 use proc_macro::TokenStream;
 
-#[proc_macro_derive(AdomCreate, attributes(AdomTable, AdomColumn, AdomAuditable))]
+#[proc_macro_derive(
+    AdomCreate,
+    attributes(AdomTable, AdomColumn, AdomIgnore, AdomAuditable)
+)]
 pub fn adom_create_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     create::impl_create_macro(&ast)
 }
 
-#[proc_macro_derive(AdomSelect, attributes(AdomTable, AdomColumn))]
+#[proc_macro_derive(AdomSelect, attributes(AdomTable, AdomColumn, AdomIgnore))]
 pub fn adom_select_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     select::impl_select_macro(&ast)
 }
 
-#[proc_macro_derive(AdomUpdate, attributes(AdomTable, AdomColumn, AdomAuditable))]
+#[proc_macro_derive(
+    AdomUpdate,
+    attributes(AdomTable, AdomColumn, AdomIgnore, AdomAuditable)
+)]
 pub fn adom_update_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     update::impl_update_macro(&ast)

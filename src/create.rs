@@ -17,6 +17,7 @@ pub fn impl_create_macro(ast: &syn::DeriveInput) -> TokenStream {
     let reads = my_fields
         .iter()
         .filter(|&f| f.ident.as_ref().unwrap().to_string() != "id")
+        .filter(|f| !utils::is_ignore(f))
         .map(|f| f.ident.as_ref())
         .filter_map(|f| f)
         .map(|f| quote! { &self.#f });
@@ -90,6 +91,7 @@ fn insert_text(table: &str, fields: &syn::Fields) -> String {
         .iter()
         .filter(|&f| f.ident.as_ref().unwrap().to_string() != "id")
         .map(|f| utils::get_columnname(f))
+        .filter_map(|f| f)
         .collect();
     //build a list of $1, $2, $3 args for the sql params
     let args: Vec<String> = cols

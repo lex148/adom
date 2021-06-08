@@ -33,7 +33,22 @@ pub fn is_auditable(ast: &syn::DeriveInput) -> bool {
     false
 }
 
-pub fn get_columnname(field: &syn::Field) -> String {
+pub fn is_ignore(field: &syn::Field) -> bool {
+    for attr in field.attrs.iter() {
+        let meta = attr.parse_meta().unwrap();
+        match meta {
+            syn::Meta::Path(p) => {
+                if p.is_ident("AdomIgnore") {
+                    return true;
+                }
+            }
+            _ => {}
+        };
+    }
+    return false;
+}
+
+pub fn get_columnname(field: &syn::Field) -> Option<String> {
     for attr in field.attrs.iter() {
         let meta = attr.parse_meta().unwrap();
         match meta {
@@ -41,12 +56,17 @@ pub fn get_columnname(field: &syn::Field) -> String {
                 // Match '#[ident = lit]' attributes. Match guard makes it '#[prefix = lit]'
                 if meta_nv.path.is_ident("AdomColumn") {
                     if let syn::Lit::Str(lit) = meta_nv.lit {
-                        return lit.value();
+                        return Some(lit.value());
                     }
+                }
+            }
+            syn::Meta::Path(p) => {
+                if p.is_ident("AdomIgnore") {
+                    return None;
                 }
             }
             _ => {}
         };
     }
-    field.ident.as_ref().unwrap().to_string()
+    Some(field.ident.as_ref().unwrap().to_string())
 }

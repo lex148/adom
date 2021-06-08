@@ -14,11 +14,13 @@ pub fn impl_select_macro(ast: &syn::DeriveInput) -> TokenStream {
     let my_fields = &my_struct.fields;
     let find_sql = select_text(&tablename, my_fields);
 
-    let from_field_setters = my_fields
-        .iter()
-        .enumerate()
-        .map(|(i, f)| (i, f.ident.as_ref().unwrap()))
-        .map(|(i, f)| quote! { #f: row.try_get(#i)? });
+    let from_field_setters = my_fields.iter().map(|f| {
+        let ident = f.ident.as_ref().unwrap();
+        match utils::get_columnname(f) {
+            Some(col) => quote! { #ident: row.try_get(#col)? },
+            None => quote! { #ident: Default::default() },
+        }
+    });
     let from_fields = quote! { #(#from_field_setters),* };
 
     let gen = quote! {
@@ -114,6 +116,7 @@ fn select_text(table: &str, fields: &syn::Fields) -> String {
     let cols: Vec<String> = fields
         .iter()
         .map(|f| utils::get_columnname(f))
+        .filter_map(|f| f)
         .map(|col| format!("{}.\"{}\"", table, col))
         .collect();
     let cols = cols.join(", ");
