@@ -8,6 +8,7 @@ mod create;
 mod delete;
 mod select;
 mod update;
+mod upsert;
 mod utils;
 use proc_macro::TokenStream;
 
@@ -39,6 +40,15 @@ pub fn adom_update_derive(input: TokenStream) -> TokenStream {
 pub fn adom_delete_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     delete::impl_delete_macro(&ast)
+}
+
+#[proc_macro_derive(
+    AdomUpsert,
+    attributes(AdomTable, AdomColumn, AdomIgnore, AdomAuditable, AdomUpsertColumn)
+)]
+pub fn adom_upsert_derive(input: TokenStream) -> TokenStream {
+    let ast = syn::parse(input).unwrap();
+    upsert::impl_upsert_macro(&ast)
 }
 
 //#[proc_macro_derive(AdomAuditable)]

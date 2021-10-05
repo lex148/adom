@@ -48,6 +48,21 @@ pub fn is_ignore(field: &syn::Field) -> bool {
     return false;
 }
 
+pub fn is_upsert_col(field: &syn::Field) -> bool {
+    for attr in field.attrs.iter() {
+        let meta = attr.parse_meta().unwrap();
+        match meta {
+            syn::Meta::Path(p) => {
+                if p.is_ident("AdomUpsertColumn") {
+                    return true;
+                }
+            }
+            _ => {}
+        };
+    }
+    return false;
+}
+
 pub fn get_columnname(field: &syn::Field) -> Option<String> {
     for attr in field.attrs.iter() {
         let meta = attr.parse_meta().unwrap();
@@ -63,6 +78,25 @@ pub fn get_columnname(field: &syn::Field) -> Option<String> {
             syn::Meta::Path(p) => {
                 if p.is_ident("AdomIgnore") {
                     return None;
+                }
+            }
+            _ => {}
+        };
+    }
+    Some(field.ident.as_ref().unwrap().to_string())
+}
+
+//get like get column name but will return the name even if it is set to ignore
+pub fn get_columnname_forced(field: &syn::Field) -> Option<String> {
+    for attr in field.attrs.iter() {
+        let meta = attr.parse_meta().unwrap();
+        match meta {
+            syn::Meta::NameValue(meta_nv) => {
+                // Match '#[ident = lit]' attributes. Match guard makes it '#[prefix = lit]'
+                if meta_nv.path.is_ident("AdomColumn") {
+                    if let syn::Lit::Str(lit) = meta_nv.lit {
+                        return Some(lit.value());
+                    }
                 }
             }
             _ => {}
