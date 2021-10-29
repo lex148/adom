@@ -3,7 +3,6 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 
-mod audit;
 mod create;
 mod delete;
 mod select;
@@ -50,9 +49,3 @@ pub fn adom_upsert_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
     upsert::impl_upsert_macro(&ast)
 }
-
-//#[proc_macro_derive(AdomAuditable)]
-//pub fn adom_auditable(input: TokenStream) -> TokenStream {
-//    let ast = syn::parse(input).unwrap();
-//    audit::impl_auditable_macro(&ast)
-//}

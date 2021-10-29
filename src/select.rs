@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use crate::utils;
 use proc_macro::TokenStream;
 use tokio_postgres::GenericClient;

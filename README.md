@@ -6,6 +6,8 @@ Adom is not intended to be a full on ORM like diesel. Its for the people that
 want to use the postgres driver directly. But want to eliminate some of the boiler plate
 code on their simple table objects.
 
+[A simple example of using adom in a project can be found here](https://github.com/lex148/adom_actix_web_example)
+
 ## Setup your structs
 
 Add an attribute to the top of your struct to connect it to the DB table
