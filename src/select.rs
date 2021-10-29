@@ -92,6 +92,20 @@ pub fn impl_select_macro(ast: &syn::DeriveInput) -> TokenStream {
                 Ok(found?)
             }
 
+            pub async fn find_all<T>(
+                client: &T,
+            ) -> std::result::Result<Vec<Self>, tokio_postgres::error::Error>
+                where T: GenericClient
+            {
+                let sql = format!("{}", #find_sql);
+                log::debug!("find_all: {}", sql);
+                let statement: tokio_postgres::Statement = client.prepare(&sql).await?;
+                let rows = client.query(&statement, &[]).await?;
+                let found: std::result::Result<Vec<Self>, tokio_postgres::error::Error> =
+                    rows.iter().map(|x| Self::from_pg_row(x) ).collect();
+                Ok(found?)
+            }
+
             fn select_text() -> String {
                 #find_sql.to_string()
             }

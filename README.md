@@ -43,8 +43,10 @@ need
 AdomSelect
 
 - Order::find_by_id(... )
+- Order::with_ids(... )
 - Order::one_where(... )
 - Order::find_where(... )
+- Order::find_all(... )
 
 AdomCreate
 
