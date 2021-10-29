@@ -60,9 +60,9 @@ AdomDelete
 
 - order.delete(.... )
 
-## Helper attribute
+## Helper attributes
 
-There are a couple of helper attribute that modify the behaver of Adom
+There are a couple of helper attributes that modify the behavior of Adom
 
 AdomColumn - used to if the struct field name doesn't match the DB columns name
 
