@@ -114,7 +114,7 @@ pub fn impl_select_macro(ast: &syn::DeriveInput) -> TokenStream {
                 #tablename.to_string()
             }
 
-            fn from_pg_row(row: &tokio_postgres::row::Row) ->
+            pub(crate) fn from_pg_row(row: &tokio_postgres::row::Row) ->
                 std::result::Result<Self, tokio_postgres::error::Error> {
                 log::debug!("from_pg_row");
                 Ok(Self {
